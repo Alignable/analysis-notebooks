@@ -8,6 +8,7 @@ dependencies = [
     "anthropic[bedrock]>=0.100.0",
     "ipykernel>=7.2.0",
     "jupyter>=1.1.1",
+    "jupyter-collaboration>=4.1.0",
     "matplotlib>=3.10.9",
     "numpy>=2.4.4",
     "pandas>=2.3",

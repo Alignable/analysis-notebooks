@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "DatalayerJupyter": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "JUPYTER_URL",
+        "-e",
+        "JUPYTER_TOKEN",
+        "-e",
+        "ALLOW_IMG_OUTPUT",
+        "datalayer/jupyter-mcp-server:latest"
+      ],
+      "env": {
+        "JUPYTER_URL": "http://host.docker.internal:8888",
+        "JUPYTER_TOKEN": "token",
+        "ALLOW_IMG_OUTPUT": "true"
+      }
+    }
+  }
+}
