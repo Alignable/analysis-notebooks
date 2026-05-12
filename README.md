@@ -14,7 +14,7 @@ This repo stores exploratory Jupyter notebooks shared across the engineering org
 
 ## Adding notebooks
 
-Each contributor gets their own directory under `notebooks/`. Create `notebooks/<your-name>/` the first time you add work. A suggested filename convention is `YYYY-MM-DD_short-description.ipynb` so notebooks sort chronologically within a directory.
+Each contributor gets their own directory under `notebooks/`. Create `notebooks/<your-name>/` the first time you add work. Notebook filenames must follow `YYYY-MM-DD_short-description.ipynb` so they sort chronologically within a directory. This is enforced by a pre-commit hook (`bin/check-notebook-filename.sh`) and a CI backstop in `.github/workflows/check-notebooks.yml`.
 
 ## Editing notebooks
 

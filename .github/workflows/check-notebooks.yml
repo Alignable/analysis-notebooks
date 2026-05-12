@@ -14,6 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check notebook filename format
+        run: |
+          shopt -s globstar nullglob
+          files=(notebooks/**/*.ipynb)
+          if (( ${#files[@]} > 0 )); then
+            bash bin/check-notebook-filename.sh "${files[@]}"
+          fi
       - uses: kynan/nbstripout@main
         with:
           paths: '**/*.ipynb'
