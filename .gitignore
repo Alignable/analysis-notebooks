@@ -12,6 +12,10 @@ wheels/
 # Jupyter
 .ipynb_checkpoints/
 .jupyter/
+.jupyter_ystore.db
+
+# Claude Code per-user state
+.claude/settings.local.json
 
 # macOS
 .DS_Store
