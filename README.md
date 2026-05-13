@@ -81,6 +81,10 @@ Cells Claude adds or edits will appear live in whichever client you have open.
 - The token is the literal string `token` — local-dev only, never exposed beyond `localhost:8888`.
 - The `jupyter-collaboration` package (in `pyproject.toml`) enables the realtime-collaboration protocol that the MCP and VS Code both use to stay in sync.
 
+## Scratch outputs (`private/`)
+
+Anything under `private/` is gitignored (except `private/README.md`). Use it for CSVs, markdown, or other artifacts your notebooks produce that you want on disk but don't want to commit. A common pattern is writing to `private/<notebook-name>/` from a notebook so each analysis keeps its own outputs together.
+
 ## Adding dependencies
 
 Use `uv add <package>` for runtime dependencies and `uv add --dev <package>` for tooling. Commit `pyproject.toml` and `uv.lock` together.

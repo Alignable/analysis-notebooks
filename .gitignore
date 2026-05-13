@@ -24,3 +24,7 @@ wheels/
 .env.local
 *.env.local
 
+# Local scratch outputs — see private/README.md
+/private/*
+!/private/README.md
+

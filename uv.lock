@@ -16,7 +16,7 @@ resolution-markers = [
 [[package]]
 name = "analysis-notebooks"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "anthropic", extra = ["bedrock"] },
     { name = "ipykernel" },
