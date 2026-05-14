@@ -19,7 +19,7 @@ When you do need the MCP:
 
 ## Conventions specific to this repo
 
-- **Notebooks must commit without outputs.** `nbstripout` runs as a pre-commit hook and CI fails on outputs. If you're creating cells programmatically and the user is going to commit, that's fine — the hook handles it on commit. Don't suggest disabling the hook.
+- **Notebooks must commit without outputs.** `nbstripout` is installed as a Git `clean`/`smudge` filter (see "Why nbstripout" in the README) and CI fails on outputs. If you're creating cells programmatically and the user is going to commit, that's fine — the filter strips outputs from the staged blob at `git add` time while leaving the working tree alone. Don't suggest disabling the filter.
 - **Dependencies live in `pyproject.toml`** and are managed with `uv`. If a notebook needs a new package, run `uv add <pkg>`, not `pip install`. Mention to the user that they'll need to commit the updated `pyproject.toml` and `uv.lock` together.
 - **The kernel** is `.venv/bin/python` via `uv`. If the user reports "module not found" errors when running cells, it's almost always that the kernel they picked (in VS Code's kernel picker, or in JupyterLab's "Change Kernel" menu) isn't the uv-managed one.
 - **Scratch outputs go in `private/`.** Anything a notebook writes that the user doesn't want committed (CSVs, intermediate markdown, sample payloads) belongs under `private/` — it's gitignored except for its README. When writing a cell that exports a file, default to `private/<notebook-name>/<file>` unless the user says otherwise. Don't write scratch outputs next to the notebook in `notebooks/<user>/`; those get committed.

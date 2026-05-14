@@ -9,8 +9,9 @@ This repo stores exploratory Jupyter notebooks shared across the engineering org
 1. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
 2. Clone the repo and `cd` into it.
 3. Run `uv sync`. This installs Python 3.12 and all dependencies into `.venv/`.
-4. Run `uv run pre-commit install`. This installs the nbstripout Git hook locally. **This step is required, not optional.** Without it, your commits will leak notebook outputs and CI will fail your PR.
-5. Start working in `notebooks/<your-name>/`.
+4. Run `uv run pre-commit install`. This installs the filename-format pre-commit hook.
+5. Run `uv run nbstripout --install`. This registers a Git `clean`/`smudge` filter so notebook outputs are stripped from commits but preserved in your local working tree. **This step is required, not optional.** Without it, your commits will leak notebook outputs and CI will fail your PR. (`.gitattributes` is already committed; this just wires up the filter in your local `.git/config`.)
+6. Start working in `notebooks/<your-name>/`.
 
 ## Adding notebooks
 
@@ -91,10 +92,13 @@ Use `uv add <package>` for runtime dependencies and `uv add --dev <package>` for
 
 ## Why nbstripout
 
-Notebook outputs — plots, large dataframes, base64-encoded images — produce huge, noisy diffs and bloat the repository over time. `nbstripout` removes outputs at commit time so only the source cells are tracked. The pre-commit hook is the primary line of defense; the GitHub Actions workflow at `.github/workflows/check-notebooks.yml` is a backstop that fails CI if someone forgets to run `pre-commit install` and pushes a notebook with outputs intact.
+Notebook outputs — plots, large dataframes, base64-encoded images — produce huge, noisy diffs and bloat the repository over time. `nbstripout` removes outputs at commit time so only the source cells are tracked.
+
+We wire it up as a Git `clean`/`smudge` filter (via `nbstripout --install`) rather than a pre-commit hook. The difference matters: a pre-commit hook would rewrite your working file, so you'd lose outputs every time you commit. The filter operates on the blob going into the index instead, leaving your working tree alone. Net effect: the repo stays clean, but your local notebook keeps its outputs across commits and branch switches.
+
+The GitHub Actions workflow at `.github/workflows/check-notebooks.yml` is a backstop that fails CI if someone forgets to run `nbstripout --install` and pushes a notebook with outputs intact.
 
 ## Troubleshooting
 
-- **"My commit was modified by the hook."** Expected on the first commit of a notebook with outputs. The hook strips them and aborts the commit so you can review. Just `git add` the file again and re-commit.
-- **"CI is failing on my PR with a notebook outputs error."** You forgot to run `pre-commit install`. Run it, then `pre-commit run --all-files`, commit the result, and push.
+- **"CI is failing on my PR with a notebook outputs error."** You forgot to run `uv run nbstripout --install` after cloning. Run it, then re-commit any notebooks that already went in with outputs (e.g. `git add notebooks/... && git commit --amend --no-edit` or a new commit).
 - **"VSCode can't find the kernel."** Make sure `uv sync` succeeded and explicitly pick `.venv/bin/python` in the interpreter and kernel pickers.
