@@ -6,12 +6,16 @@ This repo stores exploratory Jupyter notebooks shared across the engineering org
 
 ## Quick start
 
-1. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
-2. Clone the repo and `cd` into it.
-3. Run `uv sync`. This installs Python 3.12 and all dependencies into `.venv/`.
-4. Run `git config --local core.hooksPath bin/git-hooks`. This points git at the repo's committed pre-commit hook (filename-format check at `bin/git-hooks/pre-commit`).
-5. Run `uv run nbstripout --install`. This registers a Git `clean`/`smudge` filter so notebook outputs are stripped from commits but preserved in your local working tree across re-runs. **This step is required, not optional.** Without it, your commits will leak notebook outputs and CI will fail your PR. (`.gitattributes` is already committed; this just wires up the filter in your local `.git/config`.)
-6. Start working in `notebooks/<your-name>/`.
+1. Clone the repo and `cd` into it.
+2. Run `./bin/quick-start.sh`. It bundles the four steps below, and is safe to re-run any time — already-completed steps are skipped or no-op.
+3. Start working in `notebooks/<your-name>/`.
+
+What `quick-start.sh` does, if you'd rather run them by hand:
+
+- Installs [`uv`](https://docs.astral.sh/uv/getting-started/installation/) if missing — via Homebrew if available, otherwise via the official `curl | sh` installer. Skipped if `uv` is already on your `PATH`.
+- `uv sync` — installs Python 3.12 and all dependencies into `.venv/`.
+- `git config --local core.hooksPath bin/git-hooks` — points git at the repo's committed pre-commit hook (filename-format check at `bin/git-hooks/pre-commit`).
+- `uv run nbstripout --install` — registers a Git `clean`/`smudge` filter so notebook outputs are stripped from commits but preserved in your local working tree across re-runs. **Required, not optional.** Without it, your commits will leak notebook outputs and CI will fail your PR. (`.gitattributes` is already committed; this just wires up the filter in your local `.git/config`.)
 
 ## Adding notebooks
 
