@@ -1,9 +1,0 @@
-repos:
-  - repo: local
-    hooks:
-      - id: check-notebook-filename
-        name: Check notebook filename format (YYYY-MM-DD_description.ipynb)
-        entry: bin/check-notebook-filename.sh
-        language: system
-        files: '^notebooks/.+\.ipynb$'
-        exclude: '\.ipynb_checkpoints/'

@@ -9,13 +9,13 @@ This repo stores exploratory Jupyter notebooks shared across the engineering org
 1. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
 2. Clone the repo and `cd` into it.
 3. Run `uv sync`. This installs Python 3.12 and all dependencies into `.venv/`.
-4. Run `uv run pre-commit install`. This installs the filename-format pre-commit hook.
-5. Run `uv run nbstripout --install`. This registers a Git `clean`/`smudge` filter so notebook outputs are stripped from commits but preserved in your local working tree. **This step is required, not optional.** Without it, your commits will leak notebook outputs and CI will fail your PR. (`.gitattributes` is already committed; this just wires up the filter in your local `.git/config`.)
+4. Run `git config --local core.hooksPath bin/git-hooks`. This points git at the repo's committed pre-commit hook (filename-format check at `bin/git-hooks/pre-commit`).
+5. Run `uv run nbstripout --install`. This registers a Git `clean`/`smudge` filter so notebook outputs are stripped from commits but preserved in your local working tree across re-runs. **This step is required, not optional.** Without it, your commits will leak notebook outputs and CI will fail your PR. (`.gitattributes` is already committed; this just wires up the filter in your local `.git/config`.)
 6. Start working in `notebooks/<your-name>/`.
 
 ## Adding notebooks
 
-Each contributor gets their own directory under `notebooks/`. Create `notebooks/<your-name>/` the first time you add work. Notebook filenames must follow `YYYY-MM-DD_short-description.ipynb` so they sort chronologically within a directory. This is enforced by a pre-commit hook (`bin/check-notebook-filename.sh`) and a CI backstop in `.github/workflows/check-notebooks.yml`.
+Each contributor gets their own directory under `notebooks/`. Create `notebooks/<your-name>/` the first time you add work. Notebook filenames must follow `YYYY-MM-DD_short-description.ipynb` so they sort chronologically within a directory. This is enforced by `bin/git-hooks/pre-commit` (which calls `bin/check-notebook-filename.sh`) and a CI backstop in `.github/workflows/check-notebooks.yml`.
 
 ## Editing notebooks
 
@@ -94,11 +94,16 @@ Use `uv add <package>` for runtime dependencies and `uv add --dev <package>` for
 
 Notebook outputs — plots, large dataframes, base64-encoded images — produce huge, noisy diffs and bloat the repository over time. `nbstripout` removes outputs at commit time so only the source cells are tracked.
 
-We wire it up as a Git `clean`/`smudge` filter (via `nbstripout --install`) rather than a pre-commit hook. The difference matters: a pre-commit hook would rewrite your working file, so you'd lose outputs every time you commit. The filter operates on the blob going into the index instead, leaving your working tree alone. Net effect: the repo stays clean, but your local notebook keeps its outputs across commits and branch switches.
+We wire it up as a Git `clean`/`smudge` filter (via `nbstripout --install`) rather than a pre-commit hook. The difference matters: a pre-commit hook would rewrite your working file, so you'd lose outputs every time you commit. The filter operates on the blob going into the index instead, leaving your working tree alone. Net effect: the repo stays clean, and your local notebook keeps its outputs across `commit`/`push`/edit cycles.
+
+**Caveat — outputs only live in your working tree, never in git.** Any operation that re-materializes a notebook from git's object store will restore the stripped version (the smudge filter is `cat`, a no-op). That includes `git stash`, `git reset --hard`, `git checkout HEAD -- <file>`, and branch switches when the notebook differs between branches. Re-running the cells is the only way to regenerate outputs in those cases.
 
 The GitHub Actions workflow at `.github/workflows/check-notebooks.yml` is a backstop that fails CI if someone forgets to run `nbstripout --install` and pushes a notebook with outputs intact.
+
+We use a plain git hook (`bin/git-hooks/pre-commit`, wired up via `core.hooksPath`) rather than the [`pre-commit`](https://pre-commit.com) framework. The framework's stash-and-restore around hook execution is incompatible with our clean/smudge filter — when a notebook has unstaged changes, the framework's stash captures unfiltered bytes and can't re-apply them after its internal `git checkout` runs the smudge filter. A plain hook avoids that whole dance.
 
 ## Troubleshooting
 
 - **"CI is failing on my PR with a notebook outputs error."** You forgot to run `uv run nbstripout --install` after cloning. Run it, then re-commit any notebooks that already went in with outputs (e.g. `git add notebooks/... && git commit --amend --no-edit` or a new commit).
+- **"My filename-format pre-commit hook isn't running."** You forgot `git config --local core.hooksPath bin/git-hooks` after cloning. Run it and try again.
 - **"VSCode can't find the kernel."** Make sure `uv sync` succeeded and explicitly pick `.venv/bin/python` in the interpreter and kernel pickers.

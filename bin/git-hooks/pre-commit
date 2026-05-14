@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+staged=$(git diff --cached --name-only | grep -E '^notebooks/.+\.ipynb$' | grep -v '\.ipynb_checkpoints/' || true)
+[[ -z "$staged" ]] && exit 0
+exec bin/check-notebook-filename.sh $staged
